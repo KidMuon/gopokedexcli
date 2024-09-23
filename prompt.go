@@ -24,6 +24,7 @@ func startPrompt() {
 
 		if _, ok := validCommands[userCommand[0]]; !ok {
 			fmt.Println("Invalid input. Type \"help\" for help.")
+			fmt.Println("")
 			continue
 		}
 
@@ -62,6 +63,16 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
+		},
+		"map": {
+			name:        "map",
+			description: "Display the next 20 map locations",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Display the previous 20 map locations",
+			callback:    commandMapb,
 		},
 	}
 	return commands
