@@ -19,7 +19,11 @@ type PokeLocation struct {
 	Url  string `json:"url"`
 }
 
-func commandMap(state *replState) error {
+func commandMap(state *replState, args []string) error {
+	if len(args) != 0 {
+		return fmt.Errorf("map command does not accept arguments")
+	}
+
 	if state.PokeLocationNextUrl == "" {
 		fmt.Println("No more locations to show")
 		return nil
@@ -58,7 +62,11 @@ func commandMap(state *replState) error {
 	return nil
 }
 
-func commandMapb(state *replState) error {
+func commandMapb(state *replState, args []string) error {
+	if len(args) != 0 {
+		return fmt.Errorf("map command does not accept arguments")
+	}
+
 	if state.PokeLocationPrevUrl == "" {
 		fmt.Println("No previous locations to show")
 		return nil

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -29,7 +28,11 @@ func startPrompt() {
 			continue
 		}
 
-		call(validCommands[userInput].callback, state)
+		if len(userCommand) > 1 {
+			call(validCommands[userCommand[0]].callback, state, userCommand[1:])
+		} else {
+			call(validCommands[userCommand[0]].callback, state, []string{})
+		}
 
 	}
 }
@@ -40,17 +43,17 @@ func cleanAndParseCommand(input string) []string {
 	return words
 }
 
-func call(callback func(*replState) error, state *replState) {
-	err := callback(state)
+func call(callback func(*replState, []string) error, state *replState, args []string) {
+	err := callback(state, args)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("error: %v", err)
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*replState) error
+	callback    func(*replState, []string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -74,6 +77,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Display the previous 20 map locations",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Shows the pokemon that can be encountered in an area",
+			callback:    commandExplore,
 		},
 	}
 	return commands
