@@ -25,7 +25,37 @@ func commandMap(state *replState) error {
 		return nil
 	}
 
-	return getLocationFromAPI(state.PokeLocationNextUrl, state)
+	data, ok := state.Cache.Get(state.PokeLocationNextUrl)
+	if !ok {
+		resp, err := http.Get(state.PokeLocationNextUrl)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		data, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		state.Cache.Add(state.PokeLocationNextUrl, data)
+	} else {
+		fmt.Println("Retrieving from cache...")
+	}
+
+	var apiResponse PokeAPILocationResponse
+	if err := json.Unmarshal(data, &apiResponse); err != nil {
+		return err
+	}
+
+	for _, loc := range apiResponse.Results {
+		fmt.Printf("%s\n", loc.Name)
+	}
+
+	state.PokeLocationPrevUrl = state.PokeLocationNextUrl
+	state.PokeLocationNextUrl = apiResponse.Next
+
+	return nil
 }
 
 func commandMapb(state *replState) error {
@@ -34,23 +64,26 @@ func commandMapb(state *replState) error {
 		return nil
 	}
 
-	return getLocationFromAPI(state.PokeLocationPrevUrl, state)
-}
+	data, ok := state.Cache.Get(state.PokeLocationPrevUrl)
+	if !ok {
+		resp, err := http.Get(state.PokeLocationPrevUrl)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 
-func getLocationFromAPI(url string, state *replState) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+		data, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
+		state.Cache.Add(state.PokeLocationPrevUrl, data)
+	} else {
+		fmt.Println("Retrieving from cache...")
 	}
 
 	var apiResponse PokeAPILocationResponse
-	if err = json.Unmarshal(data, &apiResponse); err != nil {
+	if err := json.Unmarshal(data, &apiResponse); err != nil {
 		return err
 	}
 
@@ -58,7 +91,7 @@ func getLocationFromAPI(url string, state *replState) error {
 		fmt.Printf("%s\n", loc.Name)
 	}
 
-	state.PokeLocationNextUrl = apiResponse.Next
+	state.PokeLocationNextUrl = state.PokeLocationPrevUrl
 	state.PokeLocationPrevUrl = apiResponse.Previous
 
 	return nil

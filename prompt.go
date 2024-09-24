@@ -10,9 +10,7 @@ import (
 
 func startPrompt() {
 	validCommands := getCommands()
-	state := replState{
-		PokeLocationNextUrl: "https://pokeapi.co/api/v2/location/",
-	}
+	state := initialState()
 	scanner := bufio.NewScanner(os.Stdin)
 	var userInput string
 	for {
@@ -31,7 +29,7 @@ func startPrompt() {
 			continue
 		}
 
-		call(validCommands[userInput].callback, &state)
+		call(validCommands[userInput].callback, state)
 
 	}
 }
@@ -79,9 +77,4 @@ func getCommands() map[string]cliCommand {
 		},
 	}
 	return commands
-}
-
-type replState struct {
-	PokeLocationNextUrl string
-	PokeLocationPrevUrl string
 }
