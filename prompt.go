@@ -10,9 +10,13 @@ import (
 
 func startPrompt() {
 	validCommands := getCommands()
+	state := replState{
+		PokeLocationNextUrl: "https://pokeapi.co/api/v2/location/",
+	}
 	scanner := bufio.NewScanner(os.Stdin)
 	var userInput string
 	for {
+		fmt.Println()
 		fmt.Printf("pokedex > ")
 		scanner.Scan()
 		userInput = scanner.Text()
@@ -24,11 +28,10 @@ func startPrompt() {
 
 		if _, ok := validCommands[userCommand[0]]; !ok {
 			fmt.Println("Invalid input. Type \"help\" for help.")
-			fmt.Println("")
 			continue
 		}
 
-		call(validCommands[userInput].callback)
+		call(validCommands[userInput].callback, &state)
 
 	}
 }
@@ -39,8 +42,8 @@ func cleanAndParseCommand(input string) []string {
 	return words
 }
 
-func call(callback func() error) {
-	err := callback()
+func call(callback func(*replState) error, state *replState) {
+	err := callback(state)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +52,7 @@ func call(callback func() error) {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*replState) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -76,4 +79,9 @@ func getCommands() map[string]cliCommand {
 		},
 	}
 	return commands
+}
+
+type replState struct {
+	PokeLocationNextUrl string
+	PokeLocationPrevUrl string
 }
