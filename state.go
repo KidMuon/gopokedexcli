@@ -11,6 +11,7 @@ type replState struct {
 	Cache                pokecache.Cache
 	PokeEncounterBaseUrl string
 	PokePokemonUrl       string
+	CaughtPokemon        map[string]Pokemon
 }
 
 func initialState() *replState {
@@ -19,6 +20,7 @@ func initialState() *replState {
 		Cache:                *pokecache.NewCache(5 * time.Minute),
 		PokeEncounterBaseUrl: "https://pokeapi.co/api/v2/location-area/",
 		PokePokemonUrl:       "https://pokeapi.co/api/v2/pokemon/",
+		CaughtPokemon:        make(map[string]Pokemon),
 	}
 	return &state
 }

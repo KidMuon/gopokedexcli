@@ -9,9 +9,22 @@ import (
 	"net/http"
 )
 
-type CatchPokemon struct {
+type Pokemon struct {
 	Name           string `json:"name"`
+	Height         int    `json:"height"`
+	Weight         int    `json:"weight"`
 	BaseExperience int    `json:"base_experience"`
+	Types          []struct {
+		Type struct {
+			PokemonType string `json:"name"`
+		} `json:"type"`
+	} `json:"types"`
+	Stats []struct {
+		BaseStat int `json:"base_stat"`
+		Stat     struct {
+			StatName string `json:"name"`
+		} `json:"stat"`
+	} `json:"stats"`
 }
 
 func commandCatch(state *replState, args []string) error {
@@ -37,7 +50,7 @@ func commandCatch(state *replState, args []string) error {
 		}
 	}
 
-	var pokemon CatchPokemon
+	var pokemon Pokemon
 	if err := json.Unmarshal(data, &pokemon); err != nil {
 		return err
 	}
@@ -45,6 +58,7 @@ func commandCatch(state *replState, args []string) error {
 	fmt.Printf("Throwing Pokeball at %s...\n", pokemon.Name)
 	if catch(pokemon.BaseExperience) {
 		fmt.Printf("Caught %s!", pokemon.Name)
+		state.CaughtPokemon[pokemon.Name] = pokemon
 	} else {
 		fmt.Printf("%s got away.", pokemon.Name)
 	}
